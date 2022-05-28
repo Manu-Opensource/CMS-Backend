@@ -1,9 +1,12 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+    "encoding/json"
+    "net/http"
+)
 
-func Ping(c *gin.Context) {
-    c.JSON(200, gin.H{
-        "Message": "pong",
-    })
+func Ping(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    res, _ := json.Marshal(map[string]string{"Message": "ping"})
+    w.Write(res)
 }

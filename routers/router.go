@@ -1,15 +1,17 @@
 package routers
 
-import "github.com/gin-gonic/gin"
 
-import "github.com/Manu-Opensource/CMS-Backend/routers/api"
+import (
+    "net/http"
+    "github.com/Manu-Opensource/CMS-Backend/routers/api"
+)
 
-func RouterInit() *gin.Engine {
-    r := gin.New()
+func addRoute(path string, f func(http.ResponseWriter, *http.Request)) {
+    rHandler := http.HandlerFunc(f)
+    http.Handle(path, rHandler)
+}
 
-    r.GET("/api/ping", api.Ping)
-
-    r.Run()
-
-    return r
+func RouterInit() {
+    addRoute("/api/ping", api.Ping)
+    http.ListenAndServe(":8080", nil)
 }
