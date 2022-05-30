@@ -5,11 +5,11 @@ import (
     "github.com/golang-jwt/jwt"
 )
 
-var key = "tmpkey" //ToDo: move to an env variable.
+var key = []byte("key")
 
 type identityClaim struct {
+    Authorized bool
     *jwt.StandardClaims
-    authorized bool `json:"authorized"`
 }
 
 func IsAuthorized(tokenS string) bool {
@@ -21,16 +21,25 @@ func IsAuthorized(tokenS string) bool {
     })
     
     claims := t.Claims.(*identityClaim)
-    return claims.authorized
+    return claims.Authorized
 }
 
 func CreateAuthorizedToken() (string, error) {
-    token := jwt.New(jwt.GetSigningMethod("RS256"))
+    token := jwt.New(jwt.GetSigningMethod("HS256"))
     token.Claims = &identityClaim {
+        true,
         &jwt.StandardClaims {
             ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
         },
-        true,
     }
     return token.SignedString(key)
+}
+
+func AssignAuthToken(user string, pass string) (string, error) {
+    isAuthorized := user == "User" && pass == "Pass"
+    if isAuthorized {
+        return CreateAuthorizedToken()
+    } else {
+        return "Invalid", nil
+    }
 }

@@ -18,5 +18,6 @@ func addRoute(path string, f func(middleware.MiddlewareRes)) {
 
 func RouterInit() {
     addRoute("/api/ping", api.Ping)
+    addRoute("/api/login", api.Login)
     http.ListenAndServe(":8080", nil)
 }

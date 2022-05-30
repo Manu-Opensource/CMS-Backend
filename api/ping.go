@@ -6,8 +6,12 @@ import (
 )
 
 func Ping(r middleware.MiddlewareRes) {
-    r.Authorized = true
     r.Writer.Header().Set("Content-Type", "application/json")
-    res, _ := json.Marshal(map[string]string{"Message": "ping"})
-    r.Writer.Write(res)
+    if (r.Authorized) {
+        res, _ := json.Marshal(map[string]string{"Message": "Authorized"})
+        r.Writer.Write(res)
+    } else {
+        res, _ := json.Marshal(map[string]string{"Message": "Unauthorized"})
+        r.Writer.Write(res)
+    }
 }

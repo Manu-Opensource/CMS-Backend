@@ -12,10 +12,15 @@ type MiddlewareRes struct {
 }
 
 func MiddlewareManager(w http.ResponseWriter, r *http.Request) (MiddlewareRes) {
+    cookie, err := r.Cookie("Authorization")
     res := MiddlewareRes {
-        controllers.IsAuthorized(r.Header.Get("Authorization")),
-        w,
-        r,
+        Writer: w,
+        Request: r,
     }
-    return res
+    if err == nil {
+        res.Authorized = controllers.IsAuthorized(cookie.Value)
+    } else {
+        res.Authorized = false
+    }
+    return res;
 }
