@@ -3,11 +3,16 @@ package routers
 
 import (
     "net/http"
-    "github.com/Manu-Opensource/CMS-Backend/routers/api"
+    "github.com/Manu-Opensource/CMS-Backend/api"
+    "github.com/Manu-Opensource/CMS-Backend/middleware"
 )
 
-func addRoute(path string, f func(http.ResponseWriter, *http.Request)) {
-    rHandler := http.HandlerFunc(f)
+
+func addRoute(path string, f func(middleware.MiddlewareRes)) {
+    rHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        res := middleware.MiddlewareManager(w, r)
+        f(res)
+    })
     http.Handle(path, rHandler)
 }
 
