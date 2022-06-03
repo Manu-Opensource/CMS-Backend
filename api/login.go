@@ -8,7 +8,7 @@ import (
 
 func Login(r middleware.MiddlewareRes) {
     q := r.Request.URL.Query()
-    if (len(q["username"]) != 1 || len(q["password"]) != 1) {
+    if len(q["username"]) != 1 || len(q["password"]) != 1 {
         r.Writer.WriteHeader(400)
         return
     }

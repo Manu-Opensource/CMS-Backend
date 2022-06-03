@@ -33,7 +33,7 @@ func connect() (*mongo.Database) {
     return database
 }
 
-func DbCon() (*mongo.Database) {
+func dbCon() (*mongo.Database) {
     var conOnce sync.Once
     var database *mongo.Database
     conOnce.Do(func() {
@@ -42,7 +42,8 @@ func DbCon() (*mongo.Database) {
     return database
 }
 
-func LsCollections(d *mongo.Database) ([]string) {
+func LsCollections() ([]string) {
+    d := dbCon()
     ret, err := d.ListCollectionNames(context.Background(), bson.M{}) 
     if err != nil {
         log.Print(err)
@@ -50,15 +51,34 @@ func LsCollections(d *mongo.Database) ([]string) {
     return ret
 }
 
-func GetCollection(d *mongo.Database, name string) (*mongo.Collection) {
+func GetCollection(name string) (*mongo.Collection) {
+    d := dbCon()
     ret := d.Collection(name)
     return ret
 }
 
-func AddCollection(d *mongo.Database, name string) (*mongo.Collection) {
+func AddCollection(name string) (*mongo.Collection) {
+    d := dbCon()
     err := d.CreateCollection(context.Background(), name)
     if err != nil {
         log.Print(err)
     }
-    return GetCollection(d, name)
+    return GetCollection(name)
+}
+
+func DeleteCollection(name string) {
+    err := GetCollection(name).Drop(context.Background())
+    if err != nil {
+        log.Print(err)
+    }
+}
+
+func DoesUserExist(user string, pass string) (bool) {
+    var fRes bson.M
+    GetCollection("Users").FindOne(context.Background(), bson.M{user: user, pass: pass}).Decode(&fRes)
+    return fRes != nil
+}
+
+func AddUser(user string, pass string) {
+    GetCollection("Users").InsertOne(context.Background(), bson.M{user: user, pass: pass})
 }

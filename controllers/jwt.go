@@ -36,7 +36,7 @@ func CreateAuthorizedToken() (string, error) {
 }
 
 func AssignAuthToken(user string, pass string) (string, error) {
-    isAuthorized := user == "User" && pass == "Pass"
+    isAuthorized := DoesUserExist(user, pass)
     if isAuthorized {
         return CreateAuthorizedToken()
     } else {

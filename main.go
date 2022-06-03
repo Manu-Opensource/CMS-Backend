@@ -9,7 +9,7 @@ import (
 func main() {
     controllers.LoadEnv()
 
-    fmt.Println(controllers.LsCollections(controllers.DbCon()))
+    fmt.Println(controllers.LsCollections())
 
     routers.RouterInit()
 }
