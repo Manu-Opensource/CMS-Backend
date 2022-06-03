@@ -33,7 +33,7 @@ func connect() (*mongo.Database) {
     return database
 }
 
-func GetDatabaseConnection() (*mongo.Database) {
+func DbCon() (*mongo.Database) {
     var conOnce sync.Once
     var database *mongo.Database
     conOnce.Do(func() {
@@ -42,10 +42,23 @@ func GetDatabaseConnection() (*mongo.Database) {
     return database
 }
 
-func ListCollections(d *mongo.Database) ([]string) {
+func LsCollections(d *mongo.Database) ([]string) {
     ret, err := d.ListCollectionNames(context.Background(), bson.M{}) 
     if err != nil {
         log.Print(err)
     }
     return ret
+}
+
+func GetCollection(d *mongo.Database, name string) (*mongo.Collection) {
+    ret := d.Collection(name)
+    return ret
+}
+
+func AddCollection(d *mongo.Database, name string) (*mongo.Collection) {
+    err := d.CreateCollection(context.Background(), name)
+    if err != nil {
+        log.Print(err)
+    }
+    return GetCollection(d, name)
 }
