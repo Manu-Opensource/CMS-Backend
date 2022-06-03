@@ -6,48 +6,46 @@ import (
     "context"
     "log"
     
-    //"go.mongodb.org/mongo-driver/bson"
+    "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type DatabaseConnection struct {
-    Link string 
-    Client *mongo.Client
-}
-
-var dbCon *DatabaseConnection
-var mutLock = &sync.Mutex{}
-
-func getConnection() (*DatabaseConnection) {
-    if dbCon == nil {
-        mutLock.Lock()
-        defer mutLock.Unlock()
-        if dbCon == nil {
-            dbCon = &DatabaseConnection{}
-            dbCon.Init()
-        }
-    }
-    return dbCon
-}
-
-func (c DatabaseConnection) Init() {
+func connect() (*mongo.Database) {
     user := Getenv("DB_USER")
     pass := Getenv("DB_PASS")
     link := Getenv("DB_LINK")
-    c.Link = fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", user, pass, link)
+    abslink := fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", user, pass, link)
 
-    var err error
-    c.Client, err = mongo.NewClient(options.Client().ApplyURI(c.Link))
+    client, err := mongo.NewClient(options.Client().ApplyURI(abslink))
 
     if err != nil {
         log.Fatal(err)
     }
 
-    c.Client.Connect(context.Background())
+    client.Connect(context.Background())
+    database := client.Database("Main")
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    return database
 }
 
-func (c DatabaseConnection) Disconnect() {
-    c.Client.Disconnect(context.Background())
+func GetDatabaseConnection() (*mongo.Database) {
+    var conOnce sync.Once
+    var database *mongo.Database
+    conOnce.Do(func() {
+        database = connect()
+    })
+    return database
 }
 
+func ListCollections(d *mongo.Database) ([]string) {
+    ret, err := d.ListCollectionNames(context.Background(), bson.M{}) 
+    if err != nil {
+        log.Print(err)
+    }
+    return ret
+}
