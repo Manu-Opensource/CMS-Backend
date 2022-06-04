@@ -6,6 +6,7 @@ import (
     "context"
     "log"
     
+    "golang.org/x/crypto/bcrypt"
     "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
@@ -74,11 +75,15 @@ func DeleteCollection(name string) {
 }
 
 func DoesUserExist(user string, pass string) (bool) {
-    var fRes bson.M
-    GetCollection("Users").FindOne(context.Background(), bson.M{user: user, pass: pass}).Decode(&fRes)
-    return fRes != nil
+    var fRes bson.M //ToDo: Check for hashed
+    GetCollection("Users").FindOne(context.Background(), bson.M{"user": user}).Decode(&fRes)
+    if fRes == nil {
+        return false
+    }
+    return bcrypt.CompareHashAndPassword([]byte(fRes["pass"].(string)), []byte(pass)) == nil
 }
 
 func AddUser(user string, pass string) {
-    GetCollection("Users").InsertOne(context.Background(), bson.M{user: user, pass: pass})
+    passHashed,_ := bcrypt.GenerateFromPassword([]byte(pass), 5)
+    GetCollection("Users").InsertOne(context.Background(), bson.M{"user": user, "pass": string(passHashed[:])})
 }

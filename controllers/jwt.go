@@ -5,7 +5,7 @@ import (
     "github.com/golang-jwt/jwt"
 )
 
-var key = []byte("key")
+var key = []byte(Getenv("SECRET_KEY"))
 
 type identityClaim struct {
     Authorized bool
