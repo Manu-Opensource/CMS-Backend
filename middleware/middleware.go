@@ -22,5 +22,8 @@ func MiddlewareManager(w http.ResponseWriter, r *http.Request) (MiddlewareRes) {
     } else {
         res.Authorized = false
     }
+
+    w.Header().Set("Access-Control-Allow-Origin", controllers.Getenv("FRONTEND_LINK"))
+    w.Header().Set("Access-Control-Allow-Credentials", "true")
     return res;
 }

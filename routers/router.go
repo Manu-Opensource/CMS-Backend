@@ -20,5 +20,6 @@ func RouterInit() {
     addRoute("/api/ping", api.Ping)
     addRoute("/api/login", api.Login)
     addRoute("/api/adduser", api.AddUser)
+    addRoute("/api/isauthenticated", api.IsAuthenticated)
     http.ListenAndServe(":8080", nil)
 }

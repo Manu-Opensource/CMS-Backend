@@ -23,6 +23,6 @@ func AddUser(r middleware.MiddlewareRes) {
         controllers.AddUser(username, password)
 
     } else {
-        r.Writer.WriteHeader(401)
+        r.Writer.WriteHeader(403)
     }
 }
