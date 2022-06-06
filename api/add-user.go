@@ -15,12 +15,12 @@ func AddUser(r middleware.MiddlewareRes) {
         }
         username := q["username"][0]
         password := q["password"][0]
-        if controllers.DoesUserExist(username, password) {
+        if controllers.DoesCMSUserExist(username, password) {
             r.Writer.WriteHeader(406)
             return
         }
 
-        controllers.AddUser(username, password)
+        controllers.AddCMSUser(username, password)
 
     } else {
         r.Writer.WriteHeader(403)
