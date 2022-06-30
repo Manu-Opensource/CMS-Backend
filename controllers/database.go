@@ -107,6 +107,17 @@ func DeleteCollection(name string) {
     contentChange(fmt.Sprintf("Delete Collection [%s]", name))
 }
 
+func CreateDocument(name string, doc []map[string]interface{}) {
+    comb := bson.M{}
+    for _, element := range doc {
+        comb[element["name"].(string)] = element["value"].(string)
+    }
+    _, err := GetCollection(name).InsertOne(context.Background(), comb)
+    if err != nil {
+        log.Print(err)
+    }
+}
+
 func DoesCMSUserExist(user string, pass string) (bool) {
     var fRes bson.M //ToDo: Check for hashed
     GetCollection("CMSUsers").FindOne(context.Background(), bson.M{"user": user}).Decode(&fRes)
