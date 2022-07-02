@@ -13,3 +13,5 @@ SECRET_KEY
 FRONTEND_LINK (ex http://localhost:3000)`
 
 Then, use `go run main.go` to run the app.
+
+The codebase is kind of a mess, in my defense it is my first project with Go.
