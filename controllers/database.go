@@ -2,7 +2,6 @@ package controllers
 
 import (
     "fmt"
-    "sync"
     "context"
     "log"
     
@@ -11,6 +10,8 @@ import (
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var database *mongo.Database
 
 func connect() (*mongo.Database) {
     user := Getenv("DB_USER")
@@ -35,11 +36,9 @@ func connect() (*mongo.Database) {
 }
 
 func dbCon() (*mongo.Database) {
-    var conOnce sync.Once
-    var database *mongo.Database
-    conOnce.Do(func() {
+    if database == nil {
         database = connect()
-    })
+    }
     return database
 }
 
@@ -99,23 +98,48 @@ func AddCollection(name string) (*mongo.Collection) {
     return GetCollection(name)
 }
 
-func DeleteCollection(name string) {
-    err := GetCollection(name).Drop(context.Background())
+func GetDocument(collectionName string, documentId string) (interface{}) {
+    var result interface{}
+    GetCollection(collectionName).FindOne(context.Background(), bson.D{{"Id", documentId}}).Decode(&result)
+    return result
+}
+
+func DeleteCollection(collectionName string) {
+    err := GetCollection(collectionName).Drop(context.Background())
     if err != nil {
         log.Print(err)
     }
-    contentChange(fmt.Sprintf("Delete Collection [%s]", name))
+    contentChange(fmt.Sprintf("Delete Collection [%s]", collectionName))
 }
 
-func CreateDocument(name string, doc []map[string]interface{}) {
+func CreateDocument(collectionName string, doc []map[string]interface{}) {
+    comb := bson.M{}
+    var documentId string
+    for _, element := range doc {
+        comb[element["name"].(string)] = element["value"].(string)
+        if element["name"] == "Id" {
+            documentId = element["value"].(string)
+        }
+    }
+    _, err := GetCollection(collectionName).InsertOne(context.Background(), comb)
+    if err != nil {
+        log.Print(err)
+    }
+    contentChange(fmt.Sprintf("Created Document [%s] in Collection [%s]", documentId, collectionName))
+}
+
+func UpdateDocument(collectionName string, documentId string, doc[]map[string]interface{}) {
     comb := bson.M{}
     for _, element := range doc {
         comb[element["name"].(string)] = element["value"].(string)
     }
-    _, err := GetCollection(name).InsertOne(context.Background(), comb)
-    if err != nil {
-        log.Print(err)
-    }
+    GetCollection(collectionName).FindOneAndReplace(context.Background(), bson.D{{"Id", documentId}}, comb)
+}
+
+func DeleteDocument(collectionName string, documentId string) {
+    fmt.Println("Deleting Document", documentId)
+    GetCollection(collectionName).FindOneAndDelete(context.Background(), bson.D{{"Id", documentId}})
+    contentChange(fmt.Sprintf("Deleted Document [%s] in Collection [%s]", documentId, collectionName))
 }
 
 func DoesCMSUserExist(user string, pass string) (bool) {

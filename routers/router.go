@@ -25,5 +25,8 @@ func RouterInit() {
     addRoute("/api/collections", api.Collections)
     addRoute("/api/getcollection", api.GetCollection)
     addRoute("/api/createdocument", api.CreateDocument)
-    http.ListenAndServe(":8080", nil)
+    addRoute("/api/getdocument", api.GetDocument)
+    addRoute("/api/updatedocument", api.UpdateDocument)
+    addRoute("/api/deletedocument", api.DeleteDocument)
+    http.ListenAndServe(":8081", nil)
 }

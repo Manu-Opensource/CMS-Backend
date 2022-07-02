@@ -19,7 +19,6 @@ func GetCollection(r middleware.MiddlewareRes) {
         documents := controllers.ReadCollection(name)
         res, _ := json.Marshal(documents)
         r.Writer.Write(res)
-        r.Writer.WriteHeader(200)
     } else {
         r.Writer.WriteHeader(403)
     }
